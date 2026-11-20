@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickBite E-Commerce Storefront</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f172a; color: #f8fafc; padding: 40px; }
+        .container { max-width: 900px; margin: 0 auto; background: #1e293b; border-radius: 12px; padding: 32px; border: 1px solid #334155; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .badge { display: inline-block; background: #10b981; color: white; padding: 4px 12px; border-radius: 999px; font-weight: bold; font-size: 13px; margin-bottom: 16px; }
+        h1 { font-size: 28px; margin-bottom: 12px; color: #38bdf8; }
+        p { color: #94a3b8; line-height: 1.6; margin-bottom: 24px; font-size: 16px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 24px; }
+        .card { background: #0f172a; padding: 20px; border-radius: 8px; border: 1px solid #334155; }
+        .card h3 { font-size: 18px; color: #f1f5f9; margin-bottom: 8px; }
+        .card p { font-size: 14px; margin-bottom: 0; }
+        .footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid #334155; font-size: 13px; color: #64748b; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <span class="badge">REVERSE PROXY: PORT 80 -> PORT 3000</span>
+        <h1>QuickBite E-Commerce Frontend (React App)</h1>
+        <p>Ứng dụng React đang chạy ngầm tại cổng nội bộ <strong>localhost:3000</strong>. Nhờ cấu hình Nginx Reverse Proxy, người dùng truy cập trực tiếp qua cổng chuẩn <strong>HTTP 80</strong> (<code>http://domain.com</code>) mà không cần nhập số cổng 3000!</p>
+
+        <div class="grid">
+            <div class="card">
+                <h3>🍔 Fast Food Service</h3>
+                <p>Thực đơn món ăn nhanh, pizza, hamburger giao hàng siêu tốc.</p>
+            </div>
+            <div class="card">
+                <h3>☕ Beverage & Coffee</h3>
+                <p>Đồ uống tươi mát, cà phê espresso và trà hoa quả nguyên chất.</p>
+            </div>
+            <div class="card">
+                <h3>💳 Secure Checkout</h3>
+                <p>Tích hợp cổng thanh toán Payment Service an toàn bảo mật.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            Powered by Nginx Reverse Proxy (Port 80) & QuickBite React Microservices Platform (Port 3000)
+        </div>
+    </div>
+</body>
+</html>

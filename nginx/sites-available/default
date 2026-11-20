@@ -1,0 +1,45 @@
+# ==============================================================================
+# Nginx Reverse Proxy Configuration - QuickBite E-Commerce Frontend
+# File: /etc/nginx/sites-available/default
+# ==============================================================================
+
+server {
+    # 1. Lắng nghe mọi yêu cầu gửi đến cổng 80 (HTTP mặc định)
+    listen 80 default_server;
+    listen [::]:80 default_server;
+
+    # Tên miền áp dụng (ở đây áp dụng cho mọi domain / IP gọi tới)
+    server_name _;
+
+    # 2. Định tuyến mọi request (location /) tới ứng dụng React chạy tại port 3000
+    location / {
+        # Chỉ thị cốt lõi: Chuyển tiếp request tới upstream server nội bộ
+        proxy_pass http://localhost:3000;
+
+        # Sử dụng HTTP 1.1 để hỗ trợ WebSocket và Keep-Alive kết nối liên tục
+        proxy_http_version 1.1;
+
+        # Hỗ trợ WebSockets (dành cho React HMR hoặc tính năng realtime)
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+
+        # Giữ nguyên Host header ban đầu mà client gửi tới
+        proxy_set_header Host $host;
+
+        # Chuyển tiếp địa chỉ IP thật của người dùng (Client Real IP)
+        proxy_set_header X-Real-IP $remote_addr;
+
+        # Danh sách IP chuyển tiếp qua các proxy trung gian
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+        # Giao thức gốc (http hoặc https)
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # Tắt cache đối với các kết nối nâng cấp
+        proxy_cache_bypass $http_upgrade;
+
+        # Thời gian chờ kết nối tới upstream
+        proxy_connect_timeout 5s;
+        proxy_read_timeout 60s;
+    }
+}

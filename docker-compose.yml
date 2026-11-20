@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  # Ứng dụng E-Commerce Frontend (React) chạy ở cổng 3000
+  ecommerce-frontend:
+    image: nginx:alpine
+    container_name: ecommerce-frontend-app
+    restart: always
+    volumes:
+      - ./app:/usr/share/nginx/html:ro
+    ports:
+      - "3000:80"
+
+  # Nginx Reverse Proxy lắng nghe cổng 80 chuyển tiếp tới localhost:3000
+  nginx-reverse-proxy:
+    image: nginx:alpine
+    container_name: quickbite-nginx-proxy
+    restart: always
+    network_mode: "host" # Cho phép container truy cập localhost:3000 của host
+    volumes:
+      - ./nginx/sites-available/default:/etc/nginx/conf.d/default.conf:ro

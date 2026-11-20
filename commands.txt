@@ -1,0 +1,87 @@
+================================================================================
+DANH SÁCH CÁC LỆNH LINUX CẤU HÌNH NGINX REVERSE PROXY (SESSION 11 - BÀI TẬP 1)
+Đề tài: Cấu hình Nginx Reverse Proxy từ Cổng 80 sang React App Cổng 3000
+================================================================================
+
+# ------------------------------------------------------------------------------
+# BƯỚC 1: CÀI ĐẶT NGINX TRÊN VPS UBUNTU (NẾU CHƯA CÓ)
+# ------------------------------------------------------------------------------
+sudo apt-get update -y
+sudo apt-get install -y nginx
+
+# Đảm bảo dịch vụ Nginx đã được kích hoạt và khởi chạy
+sudo systemctl enable nginx
+sudo systemctl start nginx
+sudo systemctl status nginx --no-pager
+
+
+# ------------------------------------------------------------------------------
+# BƯỚC 2: SAO LƯU VÀ CẤU HÌNH REVERSE PROXY TẠI /etc/nginx/sites-available/default
+# ------------------------------------------------------------------------------
+# 1. Sao lưu file cấu hình mặc định
+sudo cp /etc/nginx/sites-available/default /etc/nginx/sites-available/default.bak_$(date +%F)
+
+# 2. Ghi nội dung cấu hình Reverse Proxy mới:
+sudo tee /etc/nginx/sites-available/default << 'EOF'
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+
+    server_name _;
+
+    location / {
+        proxy_pass http://localhost:3000;
+
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+EOF
+
+# 3. Tạo symbolic link sang sites-enabled (nếu chưa có)
+sudo ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+
+# 4. KIỂM TRA LỖI CÚ PHÁP FILE CẤU HÌNH (QUY TẮC BẮT BUỘC)
+sudo nginx -t
+# Output mong đợi:
+# nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+# nginx: configuration file /etc/nginx/nginx.conf test is successful
+
+# 5. Reload lại Nginx để áp dụng cấu hình mới mà không làm gián đoạn kết nối
+sudo systemctl reload nginx
+
+
+# ------------------------------------------------------------------------------
+# BƯỚC 3: THỰC NGHIỆM TRƯỜNG HỢP 1 - REACT APP HOẠT ĐỘNG (HTTP 200 OK)
+# ------------------------------------------------------------------------------
+# Khởi chạy một ứng dụng Web mô phỏng React E-Commerce Frontend ở cổng 3000:
+docker run -d --name react-ecommerce-frontend -p 3000:80 nginx:alpine
+
+# Kiểm tra từ máy cá nhân (Client gọi vào Port 80):
+curl -I http://54.254.198.85
+# Output mong đợi:
+# HTTP/1.1 200 OK
+# Server: nginx/...
+# (Nginx đã chuyển tiếp thành công request từ cổng 80 sang cổng 3000 nội bộ!)
+
+
+# ------------------------------------------------------------------------------
+# BƯỚC 4: THỰC NGHIỆM TRƯỜNG HỢP 2 - REACT APP BỊ SẬP (BẪY: HTTP 502 BAD GATEWAY)
+# ------------------------------------------------------------------------------
+# Dừng ứng dụng React ở cổng 3000 để mô phỏng sự cố ứng dụng bị sập:
+docker stop react-ecommerce-frontend
+# (Lúc này cổng 3000 hoàn toàn không còn tiến trình nào lắng nghe)
+
+# Kiểm tra lại request gửi tới Nginx ở cổng 80:
+curl -I http://54.254.198.85
+# Output mong đợi:
+# HTTP/1.1 502 Bad Gateway
+# Server: nginx/...
+# (Nginx không thể kết nối tới upstream localhost:3000 do bị từ chối kết nối Connection Refused)
+================================================================================
